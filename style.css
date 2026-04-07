@@ -109,3 +109,20 @@ body {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+#canvas-galaxia {
+z-index: 1;
+}
+
+#regalo {
+z-index: 20;
+pointer-events: none;
+}
+
+.carta {
+pointer-events: auto;
+}
+.recuerdo-activo {
+box-shadow: 0 0 40px rgba(188,133,255,0.8);
+transform: scale(1.05);
+}

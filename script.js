@@ -1,102 +1,214 @@
 const canvas = document.getElementById('canvas-galaxia');
-const ctx = canvas.getContext('2d');
 const btnStart = document.getElementById('btn-start');
 const cancion = document.getElementById('mi-cancion');
 
-let particulas = [];
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/* =========================
+   ESCENA THREE
+========================= */
+const scene = new THREE.Scene();
 
-class Particula {
-    constructor() {
-        this.radio = Math.random() * (canvas.width / 1.2); 
-        this.angulo = Math.random() * Math.PI * 2;
-        this.velocidad = Math.random() * 0.003 + 0.001;
-        this.tamaño = Math.random() * 2 + 0.5;
-        // Color inicial: Púrpura Sayonara
-        this.color = `hsl(${Math.random() * 50 + 260}, 80%, 70%)`;
-    }
+const camera = new THREE.PerspectiveCamera(
+75,
+window.innerWidth / window.innerHeight,
+0.1,
+3000
+);
 
-    actualizar() {
-        this.angulo += this.velocidad;
-    }
-
-    dibujar() {
-        const x = canvas.width / 2 + Math.cos(this.angulo) * this.radio;
-        const y = canvas.height / 2 + Math.sin(this.angulo) * this.radio;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, this.tamaño, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-    }
-}
-
-function init() {
-    particulas = [];
-    for (let i = 0; i < 300; i++) {
-        particulas.push(new Particula());
-    }
-}
-
-function animar() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    particulas.forEach(p => {
-        p.actualizar();
-        p.dibujar();
-    });
-    requestAnimationFrame(animar);
-}
-
-init();
-animar();
-
-// --- ACCIÓN AL DAR CLIC EN START ---
-btnStart.addEventListener('click', () => {
-    // 1. SOLUCIÓN AUDIO: Reproducir al clic
-    cancion.play().catch(error => console.log("Error de audio:", error));
-
-    // 2. Desvanecer la intro
-    gsap.to(".contenedor-texto", { 
-        duration: 1.5, 
-        opacity: 0, 
-        y: -30, 
-        onComplete: () => {
-            document.querySelector(".contenedor-texto").style.display = "none";
-            mostrarRegalo();
-        }
-    });
-
-    // 3. Efecto visual: Las estrellas cambian a color girasol (dorado/amarillo)
-    particulas.forEach(p => {
-        p.color = `hsl(${Math.random() * 15 + 45}, 100%, 60%)`; 
-        p.velocidad *= 1.5; 
-    });
+const renderer = new THREE.WebGLRenderer({
+canvas: canvas,
+alpha: true
 });
 
-function mostrarRegalo() {
-    const regalo = document.getElementById('regalo');
-    regalo.style.display = "block";
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-    // Animación de entrada de la carta
-    gsap.fromTo("#regalo", 
-        { opacity: 0, scale: 0.9, y: 40 }, 
-        { duration: 2, opacity: 1, scale: 1, y: 0, ease: "power3.out" }
-    );
+/* =========================
+   ESTRELLAS
+========================= */
+const starsGeometry = new THREE.BufferGeometry();
+const starsCount = 6000;
+const positions = [];
 
-    // Brillo animado en el título
-    gsap.to("#titulo-regalo", {
-        duration: 2,
-        textShadow: "0 0 20px rgba(188, 133, 255, 0.8)",
-        repeat: -1,
-        yoyo: true
-    });
+for (let i = 0; i < starsCount; i++) {
+positions.push(
+(Math.random() - 0.5) * 4000,
+(Math.random() - 0.5) * 4000,
+(Math.random() - 0.5) * 4000
+);
 }
 
+starsGeometry.setAttribute(
+'position',
+new THREE.Float32BufferAttribute(positions, 3)
+);
+
+const starsMaterial = new THREE.PointsMaterial({
+color: 0xbc85ff,
+size: 2
+});
+
+const stars = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(stars);
+
+/* =========================
+   RECUERDOS (8 FOTOS)
+========================= */
+const textureLoader = new THREE.TextureLoader();
+
+const recuerdos = [];
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+const fotos = [
+"https://i.imgur.com/1.jpg",
+"https://i.imgur.com/2.jpg",
+"https://i.imgur.com/3.jpg",
+"https://i.imgur.com/4.jpg",
+"https://i.imgur.com/5.jpg",
+"https://i.imgur.com/6.jpg",
+"https://i.imgur.com/7.jpg",
+"https://i.imgur.com/8.jpg"
+];
+
+for (let i = 0; i < 8; i++) {
+
+const texture = textureLoader.load(fotos[i]);
+
+const material = new THREE.SpriteMaterial({ map: texture });
+const sprite = new THREE.Sprite(material);
+
+// distribuir en el espacio
+sprite.position.set(
+(Math.random() - 0.5) * 800,
+(Math.random() - 0.5) * 600,
+- (Math.random() * 800 + 200)
+);
+
+sprite.scale.set(120, 80, 1);
+
+scene.add(sprite);
+recuerdos.push(sprite);
+}
+
+/* =========================
+   CÁMARA
+========================= */
+camera.position.z = 5;
+
+/* =========================
+   INTERACCIÓN CLICK
+========================= */
+window.addEventListener('click', (event) => {
+
+mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+raycaster.setFromCamera(mouse, camera);
+
+const intersects = raycaster.intersectObjects(recuerdos);
+
+if (intersects.length > 0) {
+
+const target = intersects[0].object;
+
+/* VIAJE HACIA EL RECUERDO */
+gsap.to(camera.position, {
+x: target.position.x,
+y: target.position.y,
+z: target.position.z + 100,
+duration: 2,
+ease: "power2.inOut"
+});
+
+/* EFECTO ENFOQUE */
+gsap.to(target.scale, {
+x: 180,
+y: 120,
+duration: 1
+});
+
+/* VOLVER DESPUÉS DE UN TIEMPO */
+setTimeout(() => {
+gsap.to(camera.position, {
+x: 0,
+y: 0,
+z: 5,
+duration: 3,
+ease: "power3.inOut"
+});
+
+gsap.to(target.scale, {
+x: 120,
+y: 80,
+duration: 1
+});
+
+}, 4000);
+
+}
+
+});
+
+/* =========================
+   SCROLL = AVANZAR
+========================= */
+window.addEventListener('wheel', (e) => {
+camera.position.z += e.deltaY * 0.05;
+});
+
+/* =========================
+   MOUSE = MIRAR
+========================= */
+window.addEventListener('mousemove', (e) => {
+const x = (e.clientX / window.innerWidth) - 0.5;
+const y = (e.clientY / window.innerHeight) - 0.5;
+
+camera.position.x = x * 20;
+camera.position.y = -y * 20;
+});
+
+/* =========================
+   ANIMACIÓN
+========================= */
+function animate() {
+requestAnimationFrame(animate);
+
+stars.rotation.y += 0.0005;
+
+renderer.render(scene, camera);
+}
+
+animate();
+
+/* =========================
+   START
+========================= */
+btnStart.addEventListener('click', () => {
+
+cancion.play().catch(() => {});
+
+gsap.to(".contenedor-texto", {
+duration: 1.5,
+opacity: 0,
+y: -30,
+onComplete: () => {
+document.querySelector(".contenedor-texto").style.display = "none";
+}
+});
+
+/* VIAJE INICIAL */
+gsap.to(camera.position, {
+z: -100,
+duration: 5,
+ease: "power2.inOut"
+});
+
+});
+
+/* =========================
+   RESPONSIVE
+========================= */
 window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    init();
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
 });
