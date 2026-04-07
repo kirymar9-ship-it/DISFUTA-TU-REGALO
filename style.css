@@ -1,26 +1,39 @@
-Aquí fusioné tus estilos base con los de la carta del regalo. El #regalo empieza con display: none para que no estorbe a la intro.
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {      
+    margin: 0;      
+    padding: 0;      
+    box-sizing: border-box;      
+}  
+
+body {    
+    background: radial-gradient(circle at center, #1a0033 0%, #000 80%);    
+    color: white;    
+    font-family: 'Playfair Display', serif;    
+    height: 100vh;    
+    overflow: hidden;    
+    perspective: 1000px;
+}  
+
+#luna {
+    position: absolute;
+    top: 10%;
+    right: 15%;
+    width: 100px;
+    height: 100px;
+    background: #fffce0;
+    border-radius: 50%;
+    box-shadow: 0 0 50px rgba(255, 252, 224, 0.4), inset -10px -10px 20px rgba(0,0,0,0.1);
+    z-index: 2;
+    opacity: 0.8;
 }
 
-body {
-    background: #000;
-    color: white;
-    font-family: 'Playfair Display', serif;
-    height: 100vh;
-    overflow: hidden;
-}
-
-#escena-principal {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+#escena-principal {  
+    position: relative;  
+    width: 100vw;  
+    height: 100vh;  
+    display: flex;  
+    justify-content: center;  
+    align-items: center;  
+}  
 
 #canvas-galaxia {
     position: absolute;
@@ -37,12 +50,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .texto-romantico {
-    font-size: 3rem;
+    font-size: clamp(1.5rem, 5vw, 3rem);
     font-style: italic;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
     animation: fadeInText 3s ease-in-out;
 }
@@ -66,23 +80,26 @@ body {
     box-shadow: 0 0 20px #bc85ff;
 }
 
-/* --- ESTILOS DEL REGALO --- */
 #regalo {
     position: absolute;
     z-index: 20;
     text-align: center;
     width: 85%;
-    max-width: 500px;
-    display: none; /* Se activa por JS */
+    max-width: 600px;
+    display: none; 
+    opacity: 0;
+    pointer-events: none;
 }
 
 .carta {
-    background: rgba(26, 0, 51, 0.5);
-    padding: 30px;
-    border-radius: 20px;
-    border: 1px solid rgba(188, 133, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 50px 40px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+    transition: transform 2s ease-out;
 }
 
 #titulo-regalo {
@@ -95,34 +112,22 @@ body {
     font-size: 1.1rem;
     line-height: 1.6;
     color: #fff;
-    font-family: 'Playfair Display', serif;
 }
 
 #foto-contenedor img {
     width: 100%;
     margin-top: 20px;
-    border-radius: 10px;
-    filter: grayscale(20%) brightness(90%);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    filter: grayscale(10%) brightness(95%);
+}
+
+.recuerdo-activo {
+    box-shadow: 0 0 40px rgba(188,133,255,0.8);
+    transform: scale(1.05);
 }
 
 @keyframes fadeInText {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-#canvas-galaxia {
-z-index: 1;
-}
-
-#regalo {
-z-index: 20;
-pointer-events: none;
-}
-
-.carta {
-pointer-events: auto;
-}
-.recuerdo-activo {
-box-shadow: 0 0 40px rgba(188,133,255,0.8);
-transform: scale(1.05);
 }

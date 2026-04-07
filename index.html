@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>    
-<meta charset="UTF-8">    
-<meta name="viewport" content="width=device-width, initial-scale=1.0">    
-<title>Para Alguien Especial 🌌</title>    
-<link rel="stylesheet" href="style.css">    
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>Para Alguien Especial 🌌</title>    
+    <link rel="stylesheet" href="style.css">    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 </head>    
 
 <body>  
 
-<audio id="mi-cancion" loop>    
-    <source src="paranormal.mp3" type="audio/mpeg">    
-</audio>    
+    <audio id="mi-cancion" loop>    
+        <source src="paranormal.mp3" type="audio/mpeg">    
+    </audio>    
 
-<main id="escena-principal">    
+    <div id="luna"></div>
 
-<canvas id="canvas-galaxia"></canvas>    
+    <main id="escena-principal">    
+        <canvas id="canvas-galaxia"></canvas>    
 
-<div class="contenedor-texto">    
-    <h1 class="texto-romantico">"Tú eres mi escena favorita..."</h1>    
-    <button id="btn-start">START</button>    
-</div>    
-
-<div id="regalo">    
-    <div class="carta">    
-        <h2 id="titulo-regalo">Feliz Cumpleaños</h2>    
-        <p id="mensaje-regalo">Eres la casualidad más bonita que me ha pasado...</p>    
-        <div id="foto-contenedor">    
-            <img src="" alt="Momento especial" id="foto-especial">    
+        <div class="contenedor-texto">    
+            <h1 class="texto-romantico">"Tú eres mi escena favorita..."</h1>    
+            <button id="btn-start">START</button>    
         </div>    
-    </div>    
-</div>  
 
-</main>    
+        <div id="regalo">    
+            <div class="carta">    
+                <h2 id="titulo-regalo">Feliz Cumpleaños</h2>    
+                <p id="mensaje-regalo">Eres la casualidad más bonita que me ha pasado...</p>
+                <div id="foto-contenedor">    
+                    <img src="tu-foto.jpg" alt="Momento especial" id="foto-especial">    
+                </div>    
+            </div>    
+        </div>  
+    </main>    
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>    
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="script.js"></script>  
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>  
 </body>    
 </html>
