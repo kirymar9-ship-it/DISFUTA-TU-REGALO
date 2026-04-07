@@ -3,7 +3,7 @@ const btnStart = document.getElementById('btn-start');
 const cancion = document.getElementById('mi-cancion');
 
 /* =========================
-   ESCENA THREE
+   ESCENA
 ========================= */
 const scene = new THREE.Scene();
 
@@ -11,7 +11,7 @@ const camera = new THREE.PerspectiveCamera(
 75,
 window.innerWidth / window.innerHeight,
 0.1,
-3000
+5000
 );
 
 const renderer = new THREE.WebGLRenderer({
@@ -25,14 +25,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
    ESTRELLAS
 ========================= */
 const starsGeometry = new THREE.BufferGeometry();
-const starsCount = 6000;
+const starsCount = 8000;
 const positions = [];
 
 for (let i = 0; i < starsCount; i++) {
 positions.push(
-(Math.random() - 0.5) * 4000,
-(Math.random() - 0.5) * 4000,
-(Math.random() - 0.5) * 4000
+(Math.random() - 0.5) * 5000,
+(Math.random() - 0.5) * 5000,
+(Math.random() - 0.5) * 5000
 );
 }
 
@@ -50,120 +50,110 @@ const stars = new THREE.Points(starsGeometry, starsMaterial);
 scene.add(stars);
 
 /* =========================
-   RECUERDOS (8 FOTOS)
+   CAMINO DE RECUERDOS
 ========================= */
+
 const textureLoader = new THREE.TextureLoader();
 
 const recuerdos = [];
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+const textos = [];
 
+/* 8 fotos (puedes cambiar luego) */
 const fotos = [
-"https://i.imgur.com/1.jpg",
-"https://i.imgur.com/2.jpg",
-"https://i.imgur.com/3.jpg",
-"https://i.imgur.com/4.jpg",
-"https://i.imgur.com/5.jpg",
-"https://i.imgur.com/6.jpg",
-"https://i.imgur.com/7.jpg",
-"https://i.imgur.com/8.jpg"
+"https://picsum.photos/400/300?random=1",
+"https://picsum.photos/400/300?random=2",
+"https://picsum.photos/400/300?random=3",
+"https://picsum.photos/400/300?random=4",
+"https://picsum.photos/400/300?random=5",
+"https://picsum.photos/400/300?random=6",
+"https://picsum.photos/400/300?random=7",
+"https://picsum.photos/400/300?random=8"
 ];
 
+const mensajes = [
+"Todo comenzó aquí...",
+"Un momento que nunca olvidaré",
+"Tu sonrisa cambió todo",
+"Aquí supe que eras especial",
+"El tiempo se detuvo contigo",
+"Cada instante contigo vale oro",
+"Eres mi lugar favorito",
+"Y este es solo el comienzo..."
+];
+
+/* CREAR CAMINO */
 for (let i = 0; i < 8; i++) {
 
-const texture = textureLoader.load(fotos[i]);
+const z = -i * 400 - 200;
 
+/* FOTO */
+const texture = textureLoader.load(fotos[i]);
 const material = new THREE.SpriteMaterial({ map: texture });
 const sprite = new THREE.Sprite(material);
 
-// distribuir en el espacio
 sprite.position.set(
-(Math.random() - 0.5) * 800,
-(Math.random() - 0.5) * 600,
-- (Math.random() * 800 + 200)
+Math.sin(i * 0.5) * 200,
+Math.cos(i * 0.3) * 100,
+z
 );
 
 sprite.scale.set(120, 80, 1);
 
 scene.add(sprite);
 recuerdos.push(sprite);
+
+/* TEXTO (canvas dinámico) */
+const canvasText = document.createElement("canvas");
+const ctx = canvasText.getContext("2d");
+
+canvasText.width = 512;
+canvasText.height = 256;
+
+ctx.fillStyle = "white";
+ctx.font = "28px Playfair Display";
+ctx.textAlign = "center";
+ctx.fillText(mensajes[i], 256, 130);
+
+const textureText = new THREE.CanvasTexture(canvasText);
+
+const materialText = new THREE.SpriteMaterial({ map: textureText });
+const textSprite = new THREE.Sprite(materialText);
+
+textSprite.position.set(
+sprite.position.x,
+sprite.position.y - 100,
+sprite.position.z
+);
+
+textSprite.scale.set(200, 80, 1);
+
+scene.add(textSprite);
+textos.push(textSprite);
 }
 
 /* =========================
-   CÁMARA
+   MOVIMIENTO (PROGRESO)
 ========================= */
-camera.position.z = 5;
 
-/* =========================
-   INTERACCIÓN CLICK
-========================= */
-window.addEventListener('click', (event) => {
+let progreso = 0;
+let targetProgreso = 0;
 
-mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-raycaster.setFromCamera(mouse, camera);
-
-const intersects = raycaster.intersectObjects(recuerdos);
-
-if (intersects.length > 0) {
-
-const target = intersects[0].object;
-
-/* VIAJE HACIA EL RECUERDO */
-gsap.to(camera.position, {
-x: target.position.x,
-y: target.position.y,
-z: target.position.z + 100,
-duration: 2,
-ease: "power2.inOut"
-});
-
-/* EFECTO ENFOQUE */
-gsap.to(target.scale, {
-x: 180,
-y: 120,
-duration: 1
-});
-
-/* VOLVER DESPUÉS DE UN TIEMPO */
-setTimeout(() => {
-gsap.to(camera.position, {
-x: 0,
-y: 0,
-z: 5,
-duration: 3,
-ease: "power3.inOut"
-});
-
-gsap.to(target.scale, {
-x: 120,
-y: 80,
-duration: 1
-});
-
-}, 4000);
-
-}
-
-});
-
-/* =========================
-   SCROLL = AVANZAR
-========================= */
+/* SCROLL */
 window.addEventListener('wheel', (e) => {
-camera.position.z += e.deltaY * 0.05;
+targetProgreso += e.deltaY * 0.0005;
 });
 
-/* =========================
-   MOUSE = MIRAR
-========================= */
-window.addEventListener('mousemove', (e) => {
-const x = (e.clientX / window.innerWidth) - 0.5;
-const y = (e.clientY / window.innerHeight) - 0.5;
+/* TOUCH */
+let touchStartY = 0;
 
-camera.position.x = x * 20;
-camera.position.y = -y * 20;
+window.addEventListener('touchstart', (e) => {
+touchStartY = e.touches[0].clientY;
+});
+
+window.addEventListener('touchmove', (e) => {
+let delta = touchStartY - e.touches[0].clientY;
+targetProgreso += delta * 0.0003;
+touchStartY = e.touches[0].clientY;
 });
 
 /* =========================
@@ -172,7 +162,31 @@ camera.position.y = -y * 20;
 function animate() {
 requestAnimationFrame(animate);
 
+/* suavizado */
+progreso += (targetProgreso - progreso) * 0.05;
+
+/* mover cámara en Z */
+camera.position.z = progreso * -2000 + 5;
+
+/* leve movimiento lateral */
+camera.position.x = Math.sin(progreso * 2) * 100;
+camera.position.y = Math.cos(progreso * 1.5) * 50;
+
+/* rotación universo */
 stars.rotation.y += 0.0005;
+
+/* EFECTO ACERCAMIENTO */
+recuerdos.forEach((r, i) => {
+const distancia = Math.abs(camera.position.z - r.position.z);
+
+if (distancia < 150) {
+r.scale.set(180, 120, 1);
+textos[i].material.opacity = 1;
+} else {
+r.scale.set(120, 80, 1);
+textos[i].material.opacity = 0.2;
+}
+});
 
 renderer.render(scene, camera);
 }
@@ -195,11 +209,13 @@ document.querySelector(".contenedor-texto").style.display = "none";
 }
 });
 
-/* VIAJE INICIAL */
-gsap.to(camera.position, {
-z: -100,
-duration: 5,
-ease: "power2.inOut"
+/* inicio suave */
+gsap.to({ val: 0 }, {
+val: 0.2,
+duration: 3,
+onUpdate: function() {
+targetProgreso = this.targets()[0].val;
+}
 });
 
 });
